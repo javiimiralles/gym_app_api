@@ -1,9 +1,9 @@
 import { response } from 'express';
 import bcrypt from 'bcryptjs';
-import User from '../models/user.model';
-import Exercise from '../models/exercise.model';
-import Routine from '../models/routine.model';
-import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum';
+import User from '../models/user.model.js';
+import Exercise from '../models/exercise.model.js';
+import Routine from '../models/routine.model.js';
+import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
 
 export const createUser = async(req, res = response) => {
 

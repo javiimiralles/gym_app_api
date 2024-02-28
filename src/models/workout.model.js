@@ -25,6 +25,9 @@ const WorkoutSchema = Schema(
                 }
             }]
         }],
+        note: {
+            type: String
+        }
     }, { collection: 'workouts' }
 )
 

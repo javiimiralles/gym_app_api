@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { validateFields } from '../middleware/validate-fields';
-import { login, renewToken } from '../controllers/auth.controller';
+import { validateFields } from '../middleware/validate-fields.js';
+import { login, renewToken } from '../controllers/auth.controller.js';
 
 const router = Router();
 

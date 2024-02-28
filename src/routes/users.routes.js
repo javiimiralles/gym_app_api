@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { validateJWT } from '../middleware/validate-jwt';
-import { validateGender } from '../middleware/validate-gender';
-import { validateFields } from '../middleware/validate-fields';
-import { createUser, updateUser, deleteUser } from '../controllers/users.controller';
+import { validateJWT } from '../middleware/validate-jwt.js';
+import { validateGender } from '../middleware/validate-gender.js';
+import { validateFields } from '../middleware/validate-fields.js';
+import { createUser, updateUser, deleteUser } from '../controllers/users.controller.js';
 
 const router= Router();
 

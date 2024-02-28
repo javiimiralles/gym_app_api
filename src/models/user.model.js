@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { GenderEnum } from '../enums/GenderEnum';
+import { GenderEnum } from '../enums/GenderEnum.js';
 
 const UserSchema = Schema(
     {

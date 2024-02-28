@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { DifficultyEnum } from '../enums/DifficultyEnum';
+import { DifficultyEnum } from '../enums/DifficultyEnum.js';
 
 const ExerciseSchema = Schema(
     {

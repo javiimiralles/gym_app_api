@@ -1,9 +1,9 @@
 import { response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { generateJWT } from '../utils/jwt';
-import User from '../models/user.model';
-import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum';
+import { generateJWT } from '../utils/jwt.js';
+import User from '../models/user.model.js';
+import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
 
 export const login = async(req, res = response) => {
 

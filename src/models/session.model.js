@@ -13,7 +13,7 @@ const SessionSchema = Schema(
             },
             sets: [{
                 repetitions: {
-                    type: Number
+                    type: String
                 }
             }]
         }],

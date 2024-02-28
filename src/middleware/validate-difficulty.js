@@ -1,5 +1,5 @@
 import { response } from 'express';
-import { DifficultyEnum } from '../enums/DifficultyEnum';
+import { DifficultyEnum } from '../enums/DifficultyEnum.js';
 
 export const validateGender = (req, res = response, next) => {
     const difficulty = req.body.difficulty;

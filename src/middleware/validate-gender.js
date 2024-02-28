@@ -1,5 +1,5 @@
 import { response } from 'express';
-import { GenderEnum } from '../enums/GenderEnum';
+import { GenderEnum } from '../enums/GenderEnum.js';
 
 export const validateGender = (req, res = response, next) => {
     const gender = req.body.gender;
