@@ -23,7 +23,7 @@ const UserSchema = Schema(
         },
         role: {
             type: String,
-            default: 'User'
+            default: 'USER'
         }
     }, { collection: 'users' }
 )

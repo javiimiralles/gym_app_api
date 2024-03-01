@@ -10,6 +10,10 @@ const RoutineSchema = Schema(
             type: Schema.Types.ObjectId,
             ref: 'Session',
         }],
+        iterator: {
+            type: Number,
+            default: 0
+        },
         active: {
             type: Boolean,
             default: false
@@ -17,6 +21,7 @@ const RoutineSchema = Schema(
         user: {
             type: Schema.Types.ObjectId,
             ref: 'User',
+            required: true
         }
     }, { collection: 'routines' }
 )

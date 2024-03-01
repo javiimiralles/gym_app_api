@@ -27,7 +27,7 @@ export const createUser = async(req, res = response) => {
         const user = new User(object);
         user.password = cpassword;
 
-        await usuario.save();
+        await user.save();
 
         res.json({
             ok:true,

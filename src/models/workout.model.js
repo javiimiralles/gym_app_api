@@ -27,6 +27,11 @@ const WorkoutSchema = Schema(
         }],
         note: {
             type: String
+        },
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
         }
     }, { collection: 'workouts' }
 )
