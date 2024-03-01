@@ -1,5 +1,5 @@
 export const DifficultyEnum = Object.freeze({
-    High: 'Alta',
-    Medium: 'Media',
-    Low: 'Baja'
+    High: 'ALTA',
+    Medium: 'MEDIA',
+    Low: 'BAJA'
 })

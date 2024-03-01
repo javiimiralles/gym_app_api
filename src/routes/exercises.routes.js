@@ -4,6 +4,7 @@ import { validateJWT } from '../middleware/validate-jwt.js';
 import { validateDifficulty } from '../middleware/validate-difficulty.js';
 import { validateFields } from '../middleware/validate-fields.js';
 import { getExerciseById, getExercises, createExercise, updateExercise, deleteExercise } from '../controllers/exercises.controller.js';
+import { validateMuscle } from '../middleware/validate-muscle.js';
 
 const router= Router();
 
@@ -24,6 +25,7 @@ router.get('/', [
 router.post('/', [
     validateJWT,
     check('userId','El userId no es válido').optional().isMongoId(),
+    validateMuscle,
     validateDifficulty,
     validateFields
 ], createExercise);
@@ -31,6 +33,7 @@ router.post('/', [
 router.put('/:id', [
     validateJWT,
     check('userId','El userId no es válido').optional().isMongoId(),
+    validateMuscle,
     validateDifficulty,
     validateFields
 ], updateExercise);

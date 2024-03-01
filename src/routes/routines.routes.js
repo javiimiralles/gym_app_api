@@ -20,14 +20,14 @@ router.get('/next-session/:userId', [
 
 router.post('/', [
     validateJWT,
-    check('userId','El userId no es válido').isMongoId(),
+    check('user','El userId no es válido').isMongoId(),
     validateFields
 ], createRoutine);
 
 router.put('/:id', [
     validateJWT,
     check('id','El identificador no es válido').isMongoId(),
-    check('userId','El userId no es válido').isMongoId(),
+    check('user','El userId no es válido').isMongoId(),
     validateFields
 ], updateRoutine);
 

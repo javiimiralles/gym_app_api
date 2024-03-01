@@ -11,11 +11,12 @@ const SessionSchema = Schema(
                 type: Schema.Types.ObjectId,
                 ref: 'Exercise',
             },
-            sets: [{
-                repetitions: {
-                    type: String
-                }
-            }]
+            sets: {
+                type: Number
+            },
+            repetitions: {
+                type: String
+            }
         }],
     }, { collection: 'sessions' }
 )
