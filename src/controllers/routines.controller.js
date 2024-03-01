@@ -50,15 +50,15 @@ export const getNextSessionByUser = async(req, res = response) => {
         const activeRoutine = await Routine.findOne({ user: userId, active: true });
         if(!activeRoutine) {
             // OK -> pero no hay rutina activa
-            res.json({
+            return res.json({
                 ok: true,
                 msg: 'getNextSessionByUser',
                 routine: null
             });
         }
-
+        
         const nextSessionId = activeRoutine.sessions[activeRoutine.iterator];
-        const nextSession = await Session.findById(nextSessionId);
+        const nextSession = await Session.findById(nextSessionId).populate('exercises.exercise');
         if(!nextSession) {
             return res.status(HttpStatusCodeEnum.NotFound).json({
                 ok: false,
