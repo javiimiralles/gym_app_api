@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import Workout from '../models/workout.model.js';
 import Exercise from '../models/exercise.model.js';
 import Session from '../models/session.model.js';
+import Routine from '../models/routine.model.js';
 import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
 
 export const getWorkoutById = async(req, res = response) => {
@@ -87,7 +88,7 @@ export const getWorkouts = async(req, res = response) => {
 
 export const createWorkout = async(req, res = response) => {
 
-    const { user, session, exercises, ...object } = req.body;
+    const { user, session, exercises, routine, ...object } = req.body;
 
     try {
 
@@ -117,9 +118,28 @@ export const createWorkout = async(req, res = response) => {
             }
         }
 
+        // recuperamos la rutina a la que pertenece este workout
+        const routine = await Routine.findOne({ sessions: { $elemMatch: { $eq: session } } });
+        if(!routine) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No existe ninguna rutina para este entrenamiento"
+            });
+        }
+
+        // aumentamos en uno el iterador o lo devolvemos a 0
+        if(routine.iterator < routine.sessions.length - 1) {
+            routine.iterator++;
+        } else {
+            routine.iterator = 0;
+        }
+
+        await Routine.findByIdAndUpdate(routine._id, routine, { new: true });
+
         object.user = user;
         object.exercises = exercises;
         object.session = session;
+        object.routine = routine._id;
         const workout = new Workout(object);
 
         await workout.save();
@@ -142,7 +162,7 @@ export const createWorkout = async(req, res = response) => {
 
 export const updateWorkout = async(req, res = response) => {
 
-    const { user, session, exercises, ...object } = req.body;
+    const { user, session, exercises, routine, ...object } = req.body;
     const id = req.params.id;
 
     try {

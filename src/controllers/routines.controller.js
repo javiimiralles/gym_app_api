@@ -2,6 +2,7 @@ import { response } from 'express';
 import User from '../models/user.model.js';
 import Session from '../models/session.model.js';
 import Routine from '../models/routine.model.js';
+import Workout from '../models/workout.model.js';
 import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
 
 export const getRoutineById = async(req, res = response) => {
@@ -168,10 +169,11 @@ export const deleteRoutine = async(req, res = response) => {
 
         const routine = await Routine.findByIdAndDelete(id);
 
-        // borramos las sesiones de la rutina
+        // borramos las sesiones y workouts de la rutina
         for(let sessionId of routine.sessions) {
             await Session.findByIdAndDelete(sessionId);
         }
+        await Workout.deleteMany({ routine: id });
 
         // OK
         res.json({

@@ -6,6 +6,11 @@ const WorkoutSchema = Schema(
             type: Date,
             required: true
         },
+        routine: {
+            type: Schema.Types.ObjectId,
+            ref: 'Routine',
+            required: true
+        },
         session: {
             type: Schema.Types.ObjectId,
             ref: 'Session',
