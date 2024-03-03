@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 import { validateJWT } from '../middleware/validate-jwt.js';
 import { validateFields } from '../middleware/validate-fields.js';
-import { getWorkoutById, getWorkouts, createWorkout, updateWorkout, deleteWorkout } from '../controllers/workouts.controller.js';
+import { getWorkoutById, getWorkouts, getLastWorkout, createWorkout, updateWorkout, deleteWorkout } from '../controllers/workouts.controller.js';
 
 const router= Router();
 
@@ -21,6 +21,12 @@ router.get('/', [
     check('endDate','El argumento startDate debe ser una fecha').optional().isDate(),
     validateFields
 ], getWorkouts);
+
+router.get('/last-workout/:sessionId', [
+    validateJWT,
+    check('sessionId','El identificador no es válido').isMongoId(),
+    validateFields
+], getLastWorkout);
 
 router.post('/', [
     validateJWT,

@@ -2,6 +2,7 @@ import { response } from 'express';
 import Exercise from '../models/exercise.model.js';
 import Session from '../models/session.model.js';
 import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
+import { filterDifficulty, filterMuscles } from '../utils/filterArray.js';
 
 export const getSessionById = async(req, res = response) => {
 
@@ -39,6 +40,8 @@ export const createSession = async(req, res = response) => {
 
     try {
 
+        let muscles = [];
+        let difficulties = [];
         for(let item of exercises) {
             const exerciseDB = await Exercise.findById(item.exercise);
             if(!exerciseDB) {
@@ -47,8 +50,12 @@ export const createSession = async(req, res = response) => {
                     msg: "Alguno de los ejercicios no existe"
                 });
             }
+            muscles = muscles.concat(exerciseDB.muscles);
+            difficulties.push(exerciseDB.difficulty);
         }
 
+        object.muscles = filterMuscles(muscles);
+        object.difficulty = filterDifficulty(difficulties);
         object.exercises = exercises;
         const session = new Session(object);
         await session.save();
@@ -84,6 +91,8 @@ export const updateSession = async(req, res = response) => {
             });
         }
 
+        let muscles = [];
+        let difficulties = [];
         for(let item of exercises) {
             const exerciseDB = await Exercise.findById(item.exercise);
             if(!exerciseDB) {
@@ -92,8 +101,12 @@ export const updateSession = async(req, res = response) => {
                     msg: "Alguno de los ejercicios no existe"
                 });
             }
+            muscles.concat(exerciseDB.muscles);
+            difficulties.push(exerciseDB.difficulty);
         }
 
+        object.muscles = filterMuscles(muscles);
+        object.difficulty = filterDifficulty(difficulties);
         object.exercises = exercises;
         const session = await Session.findByIdAndUpdate(id, object, { new: true });
 
@@ -144,3 +157,4 @@ export const deleteSession = async(req, res = response) => {
         });
     }
 }
+

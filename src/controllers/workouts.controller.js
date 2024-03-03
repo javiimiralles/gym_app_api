@@ -86,6 +86,38 @@ export const getWorkouts = async(req, res = response) => {
     }
 }
 
+export const getLastWorkout = async(req, res = response) => {
+
+    const sessionId = req.params.sessionId;
+
+    try {
+
+        const sessionDB = await Session.findById(sessionId);
+        if(!sessionDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No existe ninguna sesión para ese id"
+            });
+        }
+
+        const workout = await Workout.findOne({ session: sessionId }).sort({ date: -1 });
+        // OK -> devolvemos OK exista o no el ultimo workout
+        res.json({
+            ok: true,
+            msg: 'getLastWorkout',
+            workout
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error obteniendo el último entrenamiento'
+        });
+    }
+
+}
+
 export const createWorkout = async(req, res = response) => {
 
     const { user, session, exercises, routine, ...object } = req.body;

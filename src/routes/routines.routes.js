@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 import { validateJWT } from '../middleware/validate-jwt.js';
 import { validateFields } from '../middleware/validate-fields.js';
-import { getRoutineById, getNextSessionByUser, createRoutine, updateRoutine, deleteRoutine } from '../controllers/routines.controller.js';
+import { getRoutineById, getRoutines, getNextSessionByUser, createRoutine, updateRoutine, deleteRoutine } from '../controllers/routines.controller.js';
 
 const router= Router();
 
@@ -11,6 +11,12 @@ router.get('/:id', [
     check('id','El identificador no es válido').isMongoId(),
     validateFields
 ], getRoutineById);
+
+router.get('/', [
+    validateJWT,
+    check('userId','El userId no es válido').isMongoId(),
+    validateFields
+], getRoutines);
 
 router.get('/next-session/:userId', [
     validateJWT,

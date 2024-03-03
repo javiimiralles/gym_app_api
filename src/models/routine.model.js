@@ -1,10 +1,19 @@
 import { Schema, model } from 'mongoose';
+import { DifficultyEnum } from '../enums/DifficultyEnum.js';
 
 const RoutineSchema = Schema(
     {
         name: {
             type: String,
             required: true
+        },
+        description: {
+            type: String,
+        },
+        difficulty: {
+            type: String,
+            required: true,
+            enum: Object.values(DifficultyEnum)
         },
         sessions: [{
             type: Schema.Types.ObjectId,
