@@ -4,15 +4,13 @@ import { DifficultyEnum } from '../enums/DifficultyEnum.js';
 const RoutineSchema = Schema(
     {
         name: {
-            type: String,
-            required: true
+            type: String
         },
         description: {
             type: String,
         },
         difficulty: {
             type: String,
-            required: true,
             enum: Object.values(DifficultyEnum)
         },
         sessions: [{

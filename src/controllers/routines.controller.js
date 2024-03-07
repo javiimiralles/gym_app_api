@@ -12,7 +12,13 @@ export const getRoutineById = async(req, res = response) => {
 
     try {
 
-        const routine = await Routine.findById(id).populate('sessions');
+        const routine = await Routine.findById(id).populate({
+            path: 'sessions',
+            populate: { 
+                path: 'exercises.exercise',
+                model: 'Exercise' 
+            }
+        });
 
         if(!routine) {
             return res.status(HttpStatusCodeEnum.NotFound).json({
@@ -73,7 +79,7 @@ export const getRoutines = async(req, res = response) => {
             filter.name = searchText;
         }
 
-        const routines = await Routine.find(filter).sort({ active: -1 }).skip(from).limit(results);
+        const routines = await Routine.find(filter).populate('sessions').sort({ active: -1 }).skip(from).limit(results);
 
         //OK
         res.json({
@@ -138,19 +144,24 @@ export const getNextSessionByUser = async(req, res = response) => {
     }
 }
 
+// la rutina se crea vacia en un principio
 export const createRoutine = async(req, res = response) => {
 
-    const { name, sessions, user, ...object } = req.body;
+    const { user, ...object } = req.body;
 
     try {
 
-        const difficulties = await validateRoutine(name, sessions, user);
+        const userDB = await User.findById(user);
+        if (!userDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No existe ningún usuario para ese id"
+            });
+        }
 
-        object.difficulty = filterDifficulty(difficulties);
-        object.name = name;
-        object.sessions = sessions;
         object.user = user;
         object.active = false;
+        object.sessions = [];
         const routine = new Routine(object);
 
         await routine.save();
@@ -178,7 +189,7 @@ export const updateRoutine = async(req, res = response) => {
 
     try {
 
-        const routineDB = await Routine.findById(id);
+        let routineDB = await Routine.findById(id);
         if(!routineDB) {
             return res.status(HttpStatusCodeEnum.NotFound).json({
                 ok: false,
@@ -186,7 +197,36 @@ export const updateRoutine = async(req, res = response) => {
             });
         }
 
-        const difficulties = await validateRoutine(name, sessions, user);
+        if(user) {
+            const userDB = await User.findById(user);
+        
+            if (!userDB) {
+                return res.status(HttpStatusCodeEnum.NotFound).json({
+                    ok: false,
+                    msg: "No existe ningún usuario para ese id"
+                });
+            }
+        }
+    
+        routineDB = await Routine.findOne({ user, name });
+        if(routineDB && routineDB._id != id) {
+            return res.status(HttpStatusCodeEnum.BadRequest).json({
+                ok: false,
+                msg: "Ya existe una rutina con ese nombre"
+            });
+        }
+
+        const difficulties = [];
+        for(let sessionId of sessions) {
+            const sessionDB = await Session.findById(sessionId);
+            if(!sessionDB) {
+                return res.status(HttpStatusCodeEnum.NotFound).json({
+                    ok: false,
+                    msg: "Alguna de las sesiones no existe"
+                });
+            }
+            difficulties.push(sessionDB.difficulty);
+        }
 
         object.difficulty = filterDifficulty(difficulties);
         object.name = name;
@@ -208,6 +248,121 @@ export const updateRoutine = async(req, res = response) => {
             msg: 'Error editando rutina'
         });
     }
+}
+
+export const changeActiveRoutine = async(req, res = response) => {
+    const id = req.params.id;
+    const userId = req.params.userId;
+
+    try {
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No existe ningún usuario para ese id"
+            });
+        }
+
+        const routineDB = await Routine.findById(id);
+        if(!routineDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No se ha encontrado ninguna rutina con ese id"
+            });
+        }
+
+        // si se va a activar la rutina se busca si hay otra activa y se desactiva
+        if(routineDB.active == false) {
+            const activeRoutine = await Routine.findOne({ user: userId, active: true });
+            if(activeRoutine) {
+                activeRoutine.active = false;
+                await Routine.findByIdAndUpdate(activeRoutine._id, activeRoutine, { new: true });
+            }
+        }
+
+        routineDB.active = !routineDB.active;
+        const routine = await Routine.findByIdAndUpdate(id, routineDB, { new: true });
+
+        // OK 
+        res.json({
+            ok: true,
+            msg: 'changeActiveRoutine',
+            routine
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error editando rutina'
+        });
+    }
+}
+
+export const updateRoutineSessions = async(req, res = response) => {
+
+    const id = req.params.id;
+    const { sessionId, mode } = req.body;
+
+    try {
+
+        const routineDB = await Routine.findById(id);
+        if(!routineDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No se ha encontrado ninguna rutina con ese id"
+            });
+        }
+
+        const sessionDB = await Session.findById(sessionId);
+        if(!sessionDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No se ha encontrado ninguna sesión con ese id"
+            });
+        }
+
+        if(mode === 'add') {
+            if(!routineDB.sessions) {
+                routineDB.sessions = [];
+            } 
+            routineDB.sessions.push(sessionId);
+        } else {
+            const index = routineDB.sessions.indexOf(sessionId);
+            routineDB.sessions.splice(index, 1);
+        }
+
+        const difficulties = [];
+        for(let sessionId of routineDB.sessions) {
+            const sessionDB = await Session.findById(sessionId);
+            if(!sessionDB) {
+                return res.status(HttpStatusCodeEnum.NotFound).json({
+                    ok: false,
+                    msg: "Alguna de las sesiones no existe"
+                });
+            }
+            difficulties.push(sessionDB.difficulty);
+        }
+
+        routineDB.difficulty = filterDifficulty(difficulties);
+        const routine = await Routine.findByIdAndUpdate(id, routineDB, { new: true });
+
+        // OK 
+        res.json({
+            ok: true,
+            msg: 'updateRoutineSessions',
+            routine
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error editando rutina'
+        });
+    }
+
 }
 
 export const deleteRoutine = async(req, res = response) => {
@@ -247,39 +402,4 @@ export const deleteRoutine = async(req, res = response) => {
         });
     }
 
-}
-
-const validateRoutine = async(name, sessions, user) => {
-    if(user) {
-        const userDB = await User.findById(user);
-    
-        if (!userDB) {
-            return res.status(HttpStatusCodeEnum.NotFound).json({
-                ok: false,
-                msg: "No existe ningún usuario para ese id"
-            });
-        }
-    }
-
-    const routineDB = await Routine.findOne({ user, name });
-    if(routineDB) {
-        return res.status(HttpStatusCodeEnum.BadRequest).json({
-            ok: false,
-            msg: "Ya existe una rutina con ese nombre"
-        });
-    }
-
-    const difficulties = [];
-    for(let sessionId of sessions) {
-        const sessionDB = await Session.findById(sessionId);
-        if(!sessionDB) {
-            return res.status(HttpStatusCodeEnum.NotFound).json({
-                ok: false,
-                msg: "Alguna de las sesiones no existe"
-            });
-        }
-        difficulties.push(sessionDB.difficulty);
-    }
-
-    return difficulties;
 }

@@ -126,6 +126,77 @@ export const updateSession = async(req, res = response) => {
     }
 }
 
+export const updateSessionExercises = async(req, res = response) => {
+
+    const id = req.params.id;
+    const { exerciseId, mode } = req.body;
+
+    try {
+
+        const sessionDB = await Session.findById(id);
+        if(!sessionDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No se ha encontrado ninguna sesión con ese id"
+            });
+        }
+
+        const exerciseDB = await Exercise.findById(exerciseId);
+        if(!exerciseDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No se ha encontrado ningún ejercicio con ese id"
+            });
+        }
+
+        if(mode === 'add') {
+            if(!sessionDB.exercises) {
+                sessionDB.exercises = [];
+            } 
+            sessionDB.exercises.push({
+                exercise: exerciseId,
+                sets: 3,
+                repetitions: '10-12'
+            });
+        } else {
+            sessionDB.exercises = sessionDB.exercises.filter(elem => elem.exercise !== exerciseId);
+        }
+
+        let muscles = [];
+        let difficulties = [];
+        for(let item of sessionDB.exercises) {
+            const exerciseDB = await Exercise.findById(item.exercise);
+            if(!exerciseDB) {
+                return res.status(HttpStatusCodeEnum.NotFound).json({
+                    ok: false,
+                    msg: "Alguno de los ejercicios no existe"
+                });
+            }
+            muscles.concat(exerciseDB.muscles);
+            difficulties.push(exerciseDB.difficulty);
+        }
+
+        sessionDB.muscles = filterMuscles(muscles);
+        sessionDB.difficulty = filterDifficulty(difficulties);
+        const session = await Session.findByIdAndUpdate(id, sessionDB, { new: true });
+
+        // OK 
+        res.json({
+            ok: true,
+            msg: 'updateSessionExercises',
+            session
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error editando sesión'
+        });
+    }
+
+}
+
 export const deleteSession = async(req, res = response) => {
 
     const id = req.params.id;
