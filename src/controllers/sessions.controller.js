@@ -159,7 +159,7 @@ export const updateSessionExercises = async(req, res = response) => {
                 repetitions: '10-12'
             });
         } else {
-            sessionDB.exercises = sessionDB.exercises.filter(elem => elem.exercise !== exerciseId);
+            sessionDB.exercises = sessionDB.exercises.filter(elem => elem.exercise != exerciseId);
         }
 
         let muscles = [];

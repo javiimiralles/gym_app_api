@@ -331,6 +331,7 @@ export const updateRoutineSessions = async(req, res = response) => {
         } else {
             const index = routineDB.sessions.indexOf(sessionId);
             routineDB.sessions.splice(index, 1);
+            await Session.findByIdAndDelete(sessionId);
         }
 
         const difficulties = [];
