@@ -26,6 +26,10 @@ const SessionSchema = Schema(
             },
             repetitions: {
                 type: String
+            },
+            dropset: {
+                type: Boolean,
+                default: false
             }
         }],
     }, { collection: 'sessions' }

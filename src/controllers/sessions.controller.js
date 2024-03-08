@@ -101,7 +101,7 @@ export const updateSession = async(req, res = response) => {
                     msg: "Alguno de los ejercicios no existe"
                 });
             }
-            muscles.concat(exerciseDB.muscles);
+            muscles = muscles.concat(exerciseDB.muscles);
             difficulties.push(exerciseDB.difficulty);
         }
 

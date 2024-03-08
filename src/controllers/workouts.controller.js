@@ -37,7 +37,7 @@ export const getWorkoutById = async(req, res = response) => {
 }
 
 export const getWorkouts = async(req, res = response) => {
-    const userId = req.params.userId;
+    const userId = req.query.userId;
     const from = Number(req.query.from) || 0;
     const results = Number(req.query.results) || Number(process.env.DOCS_PER_PAGE);
     const startDate = !isNaN(Date.parse(req.query.startDate)) ? new Date(req.query.startDate) : null;
