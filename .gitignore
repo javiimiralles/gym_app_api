@@ -8,3 +8,6 @@
 
 # Excluir la carpeta node_modules
 node_modules/
+
+# Excluir el .env
+.env
