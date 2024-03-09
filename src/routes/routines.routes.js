@@ -10,6 +10,7 @@ import {
     updateRoutine, 
     changeActiveRoutine,
     updateRoutineSessions, 
+    skipSession,
     deleteRoutine } from '../controllers/routines.controller.js';
 
 const router= Router();
@@ -58,6 +59,12 @@ router.put('/update-sessions/:id', [
     check('mode', 'El mode es obligatorio').notEmpty(),
     validateFields
 ], updateRoutineSessions);
+
+router.put('/skip-session/:id', [
+    validateJWT,
+    check('id','El identificador no es válido').isMongoId(),
+    validateFields
+], skipSession);
 
 router.delete('/:id', [
     validateJWT,

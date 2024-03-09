@@ -132,6 +132,7 @@ export const getNextSessionByUser = async(req, res = response) => {
         res.json({
             ok: true,
             msg: 'getNextSessionByUser',
+            routine: activeRoutine,
             nextSession
         });
 
@@ -353,6 +354,45 @@ export const updateRoutineSessions = async(req, res = response) => {
         res.json({
             ok: true,
             msg: 'updateRoutineSessions',
+            routine
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error editando rutina'
+        });
+    }
+
+}
+
+export const skipSession = async(req, res = response) => {
+
+    const id = req.params.id;
+
+    try {
+
+        const routineDB = await Routine.findById(id);
+        if(!routineDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No se ha encontrado ninguna rutina con ese id"
+            });
+        }
+
+        if(routineDB.iterator < routineDB.sessions.length - 1) {
+            routineDB.iterator++;
+        } else {
+            routineDB.iterator = 0;
+        }
+
+        const routine = await Routine.findByIdAndUpdate(id, routineDB, { new: true });
+
+        // OK 
+        res.json({
+            ok: true,
+            msg: 'skipSession',
             routine
         });
 
