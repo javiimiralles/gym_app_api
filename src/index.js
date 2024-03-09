@@ -28,6 +28,6 @@ app.use('/api/routines', routinesRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/workouts', workoutsRouter);
 
-app.listen(process.env.PORT, ()=>{
+app.listen(process.env.PORT, '0.0.0.0', ()=>{
     console.log('Server running on port ' + process.env.PORT);
 });
