@@ -14,7 +14,9 @@ import workoutsRouter from './routes/workouts.routes.js';
 const app = express();
 dbConnection();
 
-app.use(cors());
+app.use(cors({
+    origin: '*'
+}));
 app.use(express.json());
 app.use(bodyParser.json());
 
