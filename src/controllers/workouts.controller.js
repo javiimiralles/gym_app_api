@@ -67,6 +67,7 @@ export const getWorkouts = async(req, res = response) => {
         const workouts = await Workout.find(filter)
                         .populate('exercises.exercise')
                         .populate('session')
+                        .sort({ date: -1 })
                         .skip(from)
                         .limit(results);
 
