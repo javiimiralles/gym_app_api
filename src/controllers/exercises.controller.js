@@ -188,7 +188,7 @@ export const updateExercise = async(req, res = response) => {
 
         let exerciseDB = await Exercise.findById(id);
 
-        if(!exercise) {
+        if(!exerciseDB) {
             return res.status(HttpStatusCodeEnum.NotFound).json({
                 ok: false,
                 msg: "No existe ningún ejercicio para ese id"
