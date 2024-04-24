@@ -79,13 +79,17 @@ export const getRoutines = async(req, res = response) => {
             filter.name = searchText;
         }
 
-        const routines = await Routine.find(filter).populate('sessions').sort({ active: -1 }).skip(from).limit(results);
+        const [routines, count] = await Promise.all([
+            Routine.find(filter).populate('sessions').sort({ active: -1, 'name': 1 }).skip(from).limit(results),
+            Routine.countDocuments(filter)
+        ])
 
         //OK
         res.json({
             ok: true,
             msg: 'getRoutines',
-            routines
+            routines,
+            count
         })
     } catch (error) {
         console.log(error);

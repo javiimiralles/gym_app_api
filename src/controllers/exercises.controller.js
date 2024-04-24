@@ -87,13 +87,17 @@ export const getExercises = async(req, res = response) => {
             filter.muscles = muscle;
         }
 
-        const exercises = await Exercise.find(filter).skip(from).limit(results);
+        const [exercises, count] = await Promise.all([
+            Exercise.find(filter).skip(from).limit(results).sort({ 'name': 1 }),
+            Exercise.countDocuments(filter)
+        ])
 
         //OK
         res.json({
             ok: true,
             msg: 'getExercises',
-            exercises
+            exercises,
+            count
         })
 
     } catch (error) {
@@ -195,12 +199,22 @@ export const updateExercise = async(req, res = response) => {
             });
         }
 
-        exerciseDB = await Exercise.findOne({ $or: [{ user: user }, { user: null }], name });
-        if(exerciseDB && exerciseDB._id !== id) {
-            return res.status(HttpStatusCodeEnum.BadRequest).json({
-                ok: false,
-                msg: "Ya existe un ejercicio con ese nombre"
-            });
+        if(user) {
+            exerciseDB = await Exercise.findOne({ user: user, name });
+            if(exerciseDB && exerciseDB._id.toString() !== id) {
+                return res.status(HttpStatusCodeEnum.BadRequest).json({
+                    ok: false,
+                    msg: "Ya existe un ejercicio con ese nombre"
+                });
+            }
+        } else {
+            exerciseDB = await Exercise.findOne({ user: null, name });
+            if(exerciseDB && exerciseDB._id.toString() !== id) {
+                return res.status(HttpStatusCodeEnum.BadRequest).json({
+                    ok: false,
+                    msg: "Ya existe un ejercicio con ese nombre"
+                });
+            }
         }
 
         object.name = name;
