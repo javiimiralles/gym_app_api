@@ -84,7 +84,7 @@ export const getExercises = async(req, res = response) => {
         }
 
         if(muscle) {
-            filter.muscles = muscle;
+            filter.muscles = { $in: [muscle] };
         }
 
         const [exercises, count] = await Promise.all([

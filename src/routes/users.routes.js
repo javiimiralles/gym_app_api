@@ -3,9 +3,16 @@ import { check } from 'express-validator';
 import { validateJWT } from '../middleware/validate-jwt.js';
 import { validateGender } from '../middleware/validate-gender.js';
 import { validateFields } from '../middleware/validate-fields.js';
-import { createUser, updateUser, deleteUser } from '../controllers/users.controller.js';
+import { getUsers, createUser, updateUser, deleteUser } from '../controllers/users.controller.js';
 
 const router= Router();
+
+router.get('/',[
+    validateJWT,
+    check('text','El argumento text debe ser un texto').optional().isString(),
+    check('from','El argumento from debe ser un numérico').optional().isNumeric(),
+    check('results','El argumento results debe ser un numérico').optional().isNumeric(),
+], getUsers);
 
 router.post('/',[
     check('name','El argumento name es obligatorio').trim().not().isEmpty(),

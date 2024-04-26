@@ -4,6 +4,64 @@ import User from '../models/user.model.js';
 import Exercise from '../models/exercise.model.js';
 import Routine from '../models/routine.model.js';
 import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
+import { infoToken } from '../utils/infotoken.js';
+
+export const getUsers = async(req, res = response) => {
+    const from = Number(req.query.from) || 0;
+    const results = Number(req.query.results) || Number(process.env.DOCS_PER_PAGE);
+    let text = req.query.text;
+
+    const token = req.headers['x-token'];
+
+    let searchText;
+    if(text) {
+        // quitamos los acentos del texto
+        const escapeRegExp = (string) => string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        text = escapeRegExp(text)
+        .replace(/a/gi, '[aáàäâã]')
+        .replace(/e/gi, '[eéèëê]')
+        .replace(/i/gi, '[iíìïî]')
+        .replace(/o/gi, '[oóòöôõ]')
+        .replace(/u/gi, '[uúùüû]');
+
+        searchText = new RegExp(text, 'i');
+    }
+
+    try {
+
+        if(infoToken(token).role !== 'ADMIN') {
+            return  res.status(HttpStatusCodeEnum.Unauthorized).json({
+                ok: false,
+                msg:"Solo los administradores pueden acceder a los usuarios"
+            })
+        }
+        
+        let filter = {};
+        if(searchText) {
+            filter.name = searchText;
+        }
+
+        const [users, count] = await Promise.all([
+            User.find(filter).skip(from).limit(results).sort({ 'name': 1 }),
+            User.countDocuments(filter)
+        ])
+
+        //OK
+        res.json({
+            ok: true,
+            msg: 'getUsers',
+            users,
+            count
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error obteniendo usuarios'
+        });
+    }
+}
 
 export const createUser = async(req, res = response) => {
 
