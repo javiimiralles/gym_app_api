@@ -7,6 +7,7 @@ import {
     getRoutines, 
     getNextSessionByUser, 
     createRoutine, 
+    createRoutineByAdmin,
     updateRoutine, 
     changeActiveRoutine,
     updateRoutineSessions, 
@@ -38,6 +39,12 @@ router.post('/', [
     check('user','El userId no es válido').isMongoId(),
     validateFields
 ], createRoutine);
+
+router.post('/admin', [
+    validateJWT,
+    check('user','El userId no es válido').isMongoId(),
+    validateFields
+], createRoutineByAdmin);
 
 router.put('/:id', [
     validateJWT,

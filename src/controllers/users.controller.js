@@ -9,6 +9,7 @@ import { infoToken } from '../utils/infotoken.js';
 export const getUsers = async(req, res = response) => {
     const from = Number(req.query.from) || 0;
     const results = Number(req.query.results) || Number(process.env.DOCS_PER_PAGE);
+    const hideAdmins = req.query.hideAdmins || false;
     let text = req.query.text;
 
     const token = req.headers['x-token'];
@@ -37,6 +38,9 @@ export const getUsers = async(req, res = response) => {
         }
         
         let filter = {};
+        if(hideAdmins) {
+            filter.role = { $ne: 'ADMIN' }; // solo buscamos usuarios
+        }
         if(searchText) {
             filter.name = searchText;
         }

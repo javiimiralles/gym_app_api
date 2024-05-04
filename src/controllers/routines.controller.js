@@ -5,6 +5,7 @@ import Routine from '../models/routine.model.js';
 import Workout from '../models/workout.model.js';
 import { HttpStatusCodeEnum } from '../enums/HttpStatusCodeEnum.js';
 import { filterDifficulty } from '../utils/filterArray.js';
+import { infoToken } from '../utils/infotoken.js';
 
 export const getRoutineById = async(req, res = response) => {
 
@@ -175,6 +176,73 @@ export const createRoutine = async(req, res = response) => {
         res.json({
             ok: true,
             msg: 'createRoutine',
+            routine
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(HttpStatusCodeEnum.InternalServerError).json({
+            ok: false,
+            msg: 'Error creando rutina'
+        });
+    }
+}
+
+// este metodo es para la crwcion de rutinas por parte de los admin
+export const createRoutineByAdmin = async(req, res = response) => {
+
+    const token = req.headers['x-token'];
+    const { user, name, sessions, ...object } = req.body;
+
+    try {
+
+        if(infoToken(token).role !== 'ADMIN') {
+            return res.status(HttpStatusCodeEnum.Unauthorized).json({
+                ok: false,
+                msg: "Solo los administradores tiene acceso a este servicio"
+            });
+        }
+
+        const userDB = await User.findById(user);
+        if (!userDB) {
+            return res.status(HttpStatusCodeEnum.NotFound).json({
+                ok: false,
+                msg: "No existe ningún usuario para ese id"
+            });
+        }
+
+        const routineDB = await Routine.findOne({ user, name });
+        if(routineDB) {
+            return res.status(HttpStatusCodeEnum.BadRequest).json({
+                ok: false,
+                msg: "Ya existe una rutina con ese nombre"
+            });
+        }
+
+        const difficulties = [];
+        for(let sessionId of sessions) {
+            const sessionDB = await Session.findById(sessionId);
+            if(!sessionDB) {
+                return res.status(HttpStatusCodeEnum.NotFound).json({
+                    ok: false,
+                    msg: "Alguna de las sesiones no existe"
+                });
+            }
+            difficulties.push(sessionDB.difficulty);
+        }
+
+        object.difficulty = filterDifficulty(difficulties);
+        object.name = name;
+        object.user = user;
+        object.sessions = sessions;
+        const routine = new Routine(object);
+
+        await routine.save();
+
+        // OK
+        res.json({
+            ok: true,
+            msg: 'createRoutineByAdmin',
             routine
         });
 
